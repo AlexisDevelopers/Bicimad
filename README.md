@@ -1,26 +1,37 @@
-# Análisis Predictivo BiciMAD - Sistema de Bicicletas Compartidas Madrid
+# 🚲 Análisis Predictivo de BiciMAD - Optimización de Operaciones
 
 ## 📋 Descripción
-Este proyecto forma parte de un Trabajo Fin de Máster centrado en el análisis y predicción de patrones de uso del sistema BiciMAD. El código implementa un pipeline completo que incluye la recolección de datos, procesamiento, análisis geoespacial y modelado predictivo.
 
-## 🚀 Funcionalidades
-- Extracción automatizada de datos del portal EMT Madrid
-- Procesamiento de datos históricos de BiciMAD
-- Análisis geoespacial de la red de estaciones
-- Cálculo de distancias óptimas entre estaciones
-- Implementación de múltiples modelos de machine learning
-- Almacenamiento automatizado en Google Drive
+Este proyecto corresponde al Trabajo Fin de Máster en Ciencia de Datos. Su objetivo es analizar patrones de uso del sistema de bicicletas compartidas BiciMAD en Madrid, calcular distancias entre estaciones y aplicar modelos de regresión para estimar comportamientos de uso, como parte de una propuesta de mejora operativa.
+
+## ⚙️ Funcionalidades Principales
+
+- Carga y procesamiento de archivos `.json` con datos históricos anonimizados de BiciMAD.
+- Cálculo de distancias entre estaciones utilizando la fórmula de Haversine.
+- Generación automática de dataset final con métricas útiles para el análisis.
+- Entrenamiento y evaluación de modelos de regresión.
+- Visualización de la distribución de distancias de viaje.
+- Almacenamiento de resultados en Google Drive.
 
 ## 🛠️ Tecnologías Utilizadas
-- Python 3.x
-- pandas para manipulación de datos
-- scikit-learn para modelos de machine learning
-- BeautifulSoup4 para web scraping
-- Google Colab y Google Drive API para procesamiento y almacenamiento
 
-## 📊 Modelos Implementados
+- Python 3.x
+- `pandas` para manipulación de datos
+- `scikit-learn` para modelos de machine learning
+- `matplotlib` y `seaborn` para visualización
+- Google Colab + API de Google Drive para ejecución y almacenamiento
+
+## 📊 Modelos de Machine Learning
+
 - Regresión Lineal
 - Ridge Regression
 - SGD Regressor
-- KNN Regressor
-- MLP Regressor (Red Neuronal)
+
+## 📦 Estructura del Proyecto
+
+```bash
+.
+├── bicimad_modelo.ipynb     # Notebook principal con el pipeline de análisis
+├── datos/                   # Archivos .json con datos de estaciones
+├── viajes_final.csv         # Archivo final generado con resultados
+└── README.md
