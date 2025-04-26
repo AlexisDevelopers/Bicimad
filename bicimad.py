@@ -1,4 +1,4 @@
-# CELL 1: Import libraries
+# Importar bibliotecas
 import pandas as pd
 import math
 import os
@@ -15,106 +15,105 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 
-# CELL 2: Upload JSON files manually via sidebar
-# (No code needed here — click the folder icon at left > upload 3 JSON files)
+# Subir archivos JSON manualmente desde la barra lateral
+# (No se necesita código: haga clic en el icono de carpeta a la izquierda > subir 3 archivos JSON)
 
-# CELL 3: Authenticate with Google Drive
+# Autenticarse con Google Drive
 auth.authenticate_user()
 drive_service = build('drive', 'v3')
 
-# CELL 4: Load JSONs, compute distances
+# Cargar JSON, calcular distancias
 json_files = ["202111_movements.json", "202210_movements.json", "202212_movements.json"]
-distancias = []  # List to store calculated distances
+distancias = [] 
 
-# Haversine formula to calculate distance between two lat/lon points (in meters)
+# Fórmula de Haversine para calcular la distancia entre dos puntos de latitud y longitud (en metros)
 def haversine_distance(lat1, lon1, lat2, lon2):
     """Calculates the distance between two geographical points using the Haversine formula."""
-    R = 6371000  # Radius of Earth in meters
+    R = 6371000 
     dlat = math.radians(lat2 - lat1)
     dlon = math.radians(lon2 - lon1)
     a = math.sin(dlat / 2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon / 2)**2
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    return R * c  # Resulting distance in meters
+    return R * c 
 
-# Loop through each file to extract latitudes and longitudes from the 'stations' column and calculate distances
+# Recorra cada archivo para extraer latitudes y longitudes de la columna 'estaciones' y calcular distancias
 for file in json_files:
     if not os.path.exists(file):
         print(f"⚠️ Warning: {file} not found. Skipping.")
         continue
     df = pd.read_json(file, encoding="ISO8859-1", lines=True)
     print(f"✅ Loaded {file} with {len(df)} rows")
-    df.dropna(inplace=True)  # Remove rows with missing values
+    df.dropna(inplace=True) 
 
-    # Extract latitudes and longitudes from the 'stations' column (which is a list of dictionaries)
+   # Extrae latitudes y longitudes de la columna 'estaciones' (que es una lista de diccionarios)
     origin_latitudes = []
     origin_longitudes = []
 
-    # Iterate through each row's 'stations' list
+    # Iterar a través de la lista de 'estaciones' de cada fila
     for row in df['stations']:
-        for station in row:  # Each row contains a list of stations
+        for station in row:  
             if 'latitude' in station and 'longitude' in station:
-                # Append latitudes and longitudes of the stations
-                origin_latitudes.append(float(station['latitude']))  # Convert to float
-                origin_longitudes.append(float(station['longitude']))  # Convert to float
+               # Añadir latitudes y longitudes de las estaciones
+                origin_latitudes.append(float(station['latitude'])) 
+                origin_longitudes.append(float(station['longitude'])) 
 
-    # Check if there are enough stations (at least 2) for distance calculation
+    # Verificar si hay suficientes estaciones (al menos 2) para el cálculo de la distancia
     if len(origin_latitudes) >= 2 and len(origin_longitudes) >= 2:
-        # Calculate distances between consecutive stations
-        for i in range(len(origin_latitudes)-1):  # Subtract 1 to avoid out of range error
+       # Calcular distancias entre estaciones consecutivas
+        for i in range(len(origin_latitudes)-1):  
             try:
                 dist = haversine_distance(origin_latitudes[i], origin_longitudes[i], origin_latitudes[i+1], origin_longitudes[i+1])
-                distancias.append(dist)  # Append the calculated distance
+                distancias.append(dist) 
             except:
-                continue  # Skip if any error occurs during distance calculation
+                continue
 
-print(f"📊 Total distances extracted: {len(distancias)}")
+print(f"📊 Distancias totales extraídas: {len(distancias)}")
 
-# CELL 5: Print out the stations data to inspect its structure
+# Imprima los datos de las estaciones para inspeccionar su estructura
 for file in json_files:
     df = pd.read_json(file, encoding="ISO8859-1", lines=True)
     print(f"✅ Loaded {file} with {len(df)} rows")
 
-    # Print the first row of the 'stations' column to inspect the structure
+    # Imprima la primera fila de la columna 'estaciones' para inspeccionar la estructura
     print(df['stations'].head())
-    break  # Only print for the first file for now
+    break 
 
-# CELL 6: Load JSONs, compute distances
-# Save the calculated distances into a DataFrame
+# Cargar JSON, calcular distancias
+# Guardar las distancias calculadas en un DataFrame
 df_viajes = pd.DataFrame({"distancias": distancias})
-df_viajes['distancia_media'] = df_viajes['distancias'].mean()  # Calculate the mean distance
-df_viajes.to_csv("viajes_final.csv", index=False)  # Save the results to CSV
+df_viajes['distancia_media'] = df_viajes['distancias'].mean() 
+df_viajes.to_csv("viajes_final.csv", index=False) 
 
-# Upload the final CSV to Google Drive
+# Sube el CSV final a Google Drive
 media = MediaFileUpload('viajes_final.csv', mimetype='text/plain', resumable=True)
 upload_final = drive_service.files().create(
     body={'name': 'viajes_final.csv', 'mimeType': 'text/plain'},
     media_body=media,
     fields='id'
 ).execute()
-print(f'File ID Final: {upload_final.get("id")}')
+print(f'ID de archivo final: {upload_final.get("id")}')
 
-# CELL 7: Train regression models
-
-# Prepare the data for training: features (X) and target (y)
-X = df_viajes.drop(['distancias'], axis=1)  # Features (no distances)
-y = df_viajes['distancias']  # Target (distances)
+# Entrenar modelos de regresión
+# Preparar los datos para el entrenamiento: características (X) y objetivo (Y)
+X = df_viajes.drop(['distancias'], axis=1) 
+y = df_viajes['distancias'] 
 
 # Reduce the test size to speed up training
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)  # 10% test size
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42) 
 
-# Standardize the data (scaling features for better model performance)
+# Estandarizar los datos (escalar funciones para un mejor rendimiento del modelo)
 scaler = StandardScaler().fit(X_train)
 X_train_scaled = scaler.transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
-# Define the models for training (removing MLP and KNN for simplicity)
+# Definir los modelos para entrenamiento (eliminando MLP y KNN para simplificar)
 modelos = {
     'Linear Regression': LinearRegression(),
     'Ridge': Ridge(),
     'SGD': SGDRegressor(),
 }
 
-# Train each model and print the R² score, MSE, and MAE
+# Entrene cada modelo e imprima el puntaje R², MSE y MAE
 for nombre, modelo in modelos.items():
     modelo.fit(X_train_scaled, y_train)
     y_pred = modelo.predict(X_test_scaled)
@@ -123,7 +122,7 @@ for nombre, modelo in modelos.items():
     mae = mean_absolute_error(y_test, y_pred)
     print(f"{nombre}: R²={score:.4f} | MSE={mse:.2f} | MAE={mae:.2f}")
 
-# CELL 7: Visualization of the distribution of distances
+# Visualización de la distribución de distancias
 
 plt.figure(figsize=(8,5))
 sns.histplot(distancias, kde=True, bins=40, color='skyblue')
@@ -133,7 +132,8 @@ plt.ylabel('Frecuencia de los Viajes')
 plt.grid(True)
 plt.show()
 
-# CELL 8: Análisis de patrones útiles para recomendaciones operativas
+
+# Análisis de patrones útiles para recomendaciones operativas
 
 # 1. Estadísticas descriptivas de distancias
 print("📈 Estadísticas de las distancias:")
