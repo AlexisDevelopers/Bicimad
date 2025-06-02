@@ -41,7 +41,7 @@ Este enfoque es útil para completar datos faltantes, detectar estaciones desbal
 
 El modelo genera una gráfica comparando los valores reales con los valores predichos:
 
-![Scatter plot]([ruta/a/tu/imagen.png](https://drive.google.com/file/d/12U_Qk-G1h6e5etA15PpqSfLCQdKyFz-Q/view?usp=sharing))
+https://drive.google.com/file/d/12U_Qk-G1h6e5etA15PpqSfLCQdKyFz-Q/view?usp=sharing
 
 ## 🛠️ Requisitos
 
